@@ -28,7 +28,8 @@
     'summary': 'Runbot',
     'version': '1.1',
     "website": "http://www.vauxoo.com/",
-    'description': "Runbot with posibility to indicate the language in the instances generated",
+    'description': "Runbot with posibility to indicate the language"
+                   " in the instances generated",
     'author': 'Vauxoo',
     'depends': ['runbot'],
     'data': [

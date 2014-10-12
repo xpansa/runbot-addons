@@ -23,7 +23,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
     This file is used to add the field lang in runbot.build and the function
-    that install and assign the language to the users in the instance generated.
+      that install and assign the language to the users in the instance
+      generated.
 '''
 from openerp.osv import fields, osv
 from openerp import tools
@@ -33,65 +34,75 @@ from openerp.addons.runbot.runbot import run
 _logger = logging.getLogger(__name__)
 
 
-class runbot_repo(osv.osv):
+class RunbotRepo(osv.osv):
 
     '''
-    Inherit class runbot_repo to add field to select the language that must be assigned to builds
-    that genere the repo.
+    Inherit class runbot_repo to add field to select the language that must
+      be assigned to builds
+      that generate the repo.
     '''
     _inherit = "runbot.repo"
 
     _columns = {
-        'lang': fields.selection(tools.scan_languages(), 'Language', help='Language to change '
+        'lang': fields.selection(tools.scan_languages(), 'Language',
+                                 help='Language to change '
                                  'instance after of run test.', copy=True),
     }
 
 
-class runbot_build(osv.osv):
+class RunbotBuild(osv.osv):
 
     '''
-    Inherit class runbot_build to add field to select the language & the function with a job
-    to install and assign the language to users if this is captured too is added with an super the
-    function create to assign the language from repo in the builds.
+    Inherit class runbot_build to add field to select the language &
+      the function with a job
+      to install and assign the language to users if this is captured
+      too is added with an super the
+      function create to assign the language from repo in the builds.
     '''
     _inherit = "runbot.build"
 
     _columns = {
-        'lang': fields.selection(tools.scan_languages(), 'Language', help='Language to change '
+        'lang': fields.selection(tools.scan_languages(), 'Language',
+                                 help='Language to change '
                                  'instance after of run test.', copy=True),
     }
 
-    # job_10_test_base = lambda self, cr, uid, build, lock_path, \
-    # log_path, args=None: build.checkout()#comment this line. only to test faster.
+    # comment this line. only to test faster.
+    # job_10_test_base = lambda self, cr, uid, build, lock_path,\
+    #                           log_path, args=None: build.checkout()
 
     def cmd(self, cr, uid, ids, context=None):
         """Return a list describing the command to start the build"""
-        cmd, modules = super(runbot_build, self).cmd(cr, uid, ids, context=context)
+        cmd, modules = super(RunbotBuild, self).cmd(cr, uid, ids,
+                                                    context=context)
         for build in self.browse(cr, uid, ids, context=context):
             if build.lang and build.job == 'job_30_run':
                 cmd.append("--load-language=%s" % (build.lang))
         return cmd, modules
 
     def update_lang(self, cr, uid, build, context=None):
+        """Set lang to all users into '-all' database"""
         # TODO: read version of odoo
         if build.lang:
-            db = "%s-all" % build.dest
+            db_name = "%s-all" % build.dest
             try:
                 # update odoo version >=7.0
-                run(['psql', db, '-c', "UPDATE res_partner SET lang='%s' "
-                    "WHERE id IN (SELECT partner_id FROM res_users);" % (build.lang)])
+                run(['psql', db_name, '-c', "UPDATE res_partner SET lang='%s' "
+                     "WHERE id IN (SELECT partner_id FROM res_users);" %
+                     (build.lang)])
             except:
                 pass
             try:
                 # update odoo version <7.0
-                run(['psql', db, '-c', "UPDATE res_users SET lang='%s';" % (build.lang)])
+                run(['psql', db_name, '-c', "UPDATE res_users SET lang='%s';" %
+                     (build.lang)])
             except:
                 pass
         return True
 
     def job_30_run(self, cr, uid, build, lock_path, log_path):
-        res = super(runbot_build, self).job_30_run(cr, uid, build,
-                lock_path, log_path)
+        res = super(RunbotBuild, self).job_30_run(cr, uid, build,
+                                                  lock_path, log_path)
         self.update_lang(cr, uid, build)
         return res
 
@@ -99,12 +110,12 @@ class runbot_build(osv.osv):
         """
         This method set language from repo in the build.
         """
-        new_id = super(runbot_build, self).create(cr, uid, values, context=context)
-        lang = self.read(cr, uid, [new_id], ['lang'], context=context)[0]['lang']
-        if values.get('branch_id', False) and not values.has_key('lang'):
-            branch_id = self.pool.get('runbot.branch').browse(cr, uid,
-                                                              values['branch_id'])
-            self.write(cr, uid, [new_id], {'lang': branch_id.repo_id and
-                 branch_id.repo_id.lang or False}, context=context)
-        return new_id
+        if values.get('branch_id', False) and 'lang' not in values.keys():
+            branch_id = self.pool.get('runbot.branch').browse(
+                cr, uid, values['branch_id'])
+            values.update({
+                'lang': branch_id.repo_id and branch_id.repo_id.lang or False,
+            })
+        return super(RunbotBuild, self).create(cr, uid, values,
+                                               context=context)
     # TODO: Force build or rebuild function not get lang of old build
