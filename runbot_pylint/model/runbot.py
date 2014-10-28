@@ -183,7 +183,11 @@ class RunbotBuild(osv.osv):
 
             # get all depends and sub-depends from modules
             _, modules = build.cmd()
-            depends = set(get_depends(modules, build.server('addons')))
+            try:
+                depends = set(get_depends(modules, build.server('addons')))
+            except:
+                depends = []
+                # TODO: Add log
 
             # get all modules to check pylint intersection with modules depends
             modules_to_check_pylint = list(depends & modules_to_check_pylint)
