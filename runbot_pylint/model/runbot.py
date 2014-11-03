@@ -178,8 +178,9 @@ class RunbotBuild(osv.osv):
                 repo = repo_pool.browse(cr, uid, repo_id, context=context)
                 if repo.check_pylint:
                     branch_name = repo_branch_name_data[repo_id]
-                    branch_ls = repo.get_module_list(branch_name)
-                    modules_to_check_pylint |= set(branch_ls)
+                    if branch_name:
+                        branch_ls = repo.get_module_list(branch_name)
+                        modules_to_check_pylint |= set(branch_ls)
 
             # get all depends and sub-depends from modules
             _, modules = build.cmd()
