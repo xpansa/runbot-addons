@@ -268,6 +268,11 @@ class RunbotBuild(osv.osv):
         if os.path.isfile(pylint_log):
             with open(pylint_log, "r") as fpylint_log:
                 for line in fpylint_log.xreadlines():
+                    # Ignore fail I0011 has a bug:
+                    # https://bitbucket.org/logilab/pylint/issue/340
+                    #        /pylint-disable-c0302-does-not-work
+                    if 'I0011' in line:
+                        continue
                     if not pylint_error and '****' in line:
                         pylint_error = True
                     if pylint_error:
