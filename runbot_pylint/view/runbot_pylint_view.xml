@@ -26,7 +26,7 @@
         <!--Inherit runbot qweb view-->
         <template id="build_button_pylint" inherit_id="runbot.build_button">
             <xpath expr="//li[7]" position="after">
-                <li><a t-attf-href="/runbot/static/build/#{bu['real_dest']}/logs/job_15_pylint.txt">Pylint logs <i class="fa fa-file-text-o"/></a></li>
+                <li><a t-attf-href="/runbot/static/build/#{bu['real_dest']}/logs/job_25_pylint.txt">Pylint logs <i class="fa fa-file-text-o"/></a></li>
             </xpath>
         </template>
 

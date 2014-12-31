@@ -264,7 +264,7 @@ class RunbotBuild(osv.osv):
         """
         res = super(RunbotBuild, self).job_30_run(cr, uid, build, lock_path,
                                                   log_path)
-        pylint_log = build.path('logs', 'job_15_pylint.txt')
+        pylint_log = build.path('logs', 'job_25_pylint.txt')
         pylint_error = False
         max_log_lines = 20
         count = 0
