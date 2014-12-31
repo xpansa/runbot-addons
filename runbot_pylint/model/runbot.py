@@ -194,7 +194,7 @@ class RunbotBuild(osv.osv):
             modules_to_check_pylint = list(depends & modules_to_check_pylint)
         return modules_to_check_pylint
 
-    def job_15_pylint(self, cr, uid, build, lock_path, log_path, args=None):
+    def job_25_pylint(self, cr, uid, build, lock_path, log_path, args=None):
         """
         This method is used to run pylint test, getting parameters of the
         pylint configuration, the parameters errors and files to ignore has
