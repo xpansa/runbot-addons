@@ -28,13 +28,14 @@
     'category': 'Website',
     'summary': 'Runbot',
     'version': '1.0',
-    'description': """This module create a new database from a runbot build without data demo and without test""",
+    'description': """This module create a new database
+                   from a runbot build without data demo
+                   and without test""",
     'author': 'Vauxoo',
     'depends': ['runbot'],
     'external_dependencies': {
     },
     'data': [
-        #"view/runbot_pylint_view.xml",
     ],
     'installable': True,
 }
