@@ -7,9 +7,9 @@ class RunbotBuild(osv.osv):
     def job_28_wodemo(self, cr, uid, build, lock_path, log_path, args=None):
         build._log('wodemo', 'Start database without demo')
         #build.checkout() # tmp to test
-        self.pg_createdb(cr, uid, "%s-all-wodemo" % build.dest)
+        self.pg_createdb(cr, uid, "%s-wodemo" % build.dest)
         cmd, mods = build.cmd()
-        cmd += ['-d', '%s-all-wodemo' % build.dest, '-i', mods, '--stop-after-init', '--log-level=info']
+        cmd += ['-d', '%s-wodemo' % build.dest, '-i', mods, '--stop-after-init', '--log-level=info']
         cmd += ['--without-demo=True']
         if "--test-enable" in cmd:
             cmd.remove('--test-enable')
