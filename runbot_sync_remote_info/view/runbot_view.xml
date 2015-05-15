@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!--Runbot branch inherit view-->
+        <record id="view_runbot_branch_inh_sync_form" model="ir.ui.view">
+            <field name="model">runbot.branch</field>
+            <field name="inherit_id" ref="runbot.view_branch_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='modules']" position="after">
+                    <field name="branch_remote_name"/>
+                    <field name="branch_remote_pr_number"/>
+                    <field name="branch_remote_state"/>
+                    <field name="active"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="view_runbot_branch_inh_sync_tree" model="ir.ui.view">
+            <field name="model">runbot.branch</field>
+            <field name="inherit_id" ref="runbot.view_branch_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="branch_remote_name"/>
+                    <field name="branch_remote_pr_number"/>
+                    <field name="branch_remote_state"/>
+                    <field name="active"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>

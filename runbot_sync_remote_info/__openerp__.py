@@ -37,6 +37,8 @@
     'external_dependencies': {
     },
     'data': [
+        'data/ir_cron_data.xml',
+        'view/runbot_view.xml',
     ],
     'installable': True,
 }
