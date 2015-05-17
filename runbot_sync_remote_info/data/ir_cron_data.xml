@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+
+    <data noupdate="1">
+        <!-- Cron sync remote-->
+        <record model="ir.cron" id="repo_sync_remote">
+            <field name='name'>Runbot Cron Sync Remote</field>
+            <field name='interval_number'>10</field>
+            <field name='interval_type'>minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+            <field name="model">runbot.repo</field>
+            <field name="function">sync_remote_cron</field>
+            <field name="args">()</field>
+        </record>
+    </data>
+
+</openerp>
+
