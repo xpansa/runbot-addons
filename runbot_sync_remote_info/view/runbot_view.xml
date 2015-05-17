@@ -11,7 +11,6 @@
                     <field name="branch_remote_name"/>
                     <field name="branch_remote_pr_number"/>
                     <field name="branch_remote_state"/>
-                    <field name="active"/>
                 </xpath>
             </field>
         </record>
@@ -23,7 +22,6 @@
                     <field name="branch_remote_name"/>
                     <field name="branch_remote_pr_number"/>
                     <field name="branch_remote_state"/>
-                    <field name="active"/>
                 </xpath>
             </field>
         </record>

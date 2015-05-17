@@ -5,7 +5,7 @@ from openerp import api, fields, models
 
 
 _logger = logging.getLogger(__name__)
-
+INACTIVE_STATE = 'closed'
 
 class RunbotBranch(models.Model):
     _inherit = 'runbot.branch'
@@ -13,11 +13,10 @@ class RunbotBranch(models.Model):
     branch_remote_name = fields.Char()
     branch_remote_pr_number = fields.Integer()
     branch_remote_state = fields.Char(size=16)
-    active = fields.Boolean(default=True)
 
     def write(self, cr, uid, ids, vals, context=None):
-        if 'active' in vals:
-            if vals['active'] is False:
+        if 'state' in vals:
+            if vals['state'] == INACTIVE_STATE:
                 rb_pool = self.pool.get('runbot.build')
                 rbl_pool = self.pool.get('runbot.build.line')
                 build_ids = []
@@ -39,7 +38,7 @@ class RunbotBranch(models.Model):
                 ], context=context)
                 rb_pool.kill(
                     cr, uid, build_ids,
-                    result='Inactive branch',
+                    result='Inactived branch',
                     context=context)
         return super(RunbotBranch, self).write(
             cr, uid, ids, vals, context=context)
@@ -65,11 +64,11 @@ class RunbotRepo(models.Model):
                         'branch_remote_name': info_pull['head']['label'],
                         'branch_remote_pr_number': info_pull['number'],
                         'branch_remote_state': info_pull['state'],
-                        'active': info_pull['state'] == 'open',
+                        'state': info_pull['state'],
                     })
 
     @api.model
     def sync_remote_cron(self):
-        repos = self.search([('active', '=', True)])
+        repos = self.search([('state', '<>', INACTIVE_STATE)])
         for repo in repos:
             repo.sync_remote()
