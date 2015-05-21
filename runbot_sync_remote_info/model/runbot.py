@@ -1,6 +1,8 @@
 
 import logging
 
+import openerp
+
 from openerp import api, fields, models
 
 
@@ -58,16 +60,24 @@ class RunbotRepo(models.Model):
                 '|', ('branch_remote_state', '<>', INACTIVE_STATE),
                 ('branch_remote_state', '=', False),
             ])
-            for branch in branches:
-                pull_number = branch.branch_name
-                info_pull = self.github(
-                    '/repos/:owner/:repo/pulls/%s' % (pull_number))
-                if info_pull.get('id', False):
-                    branch.write({
-                        'branch_remote_name': info_pull['head']['label'],
-                        'branch_remote_pr_number': info_pull['number'],
-                        'branch_remote_state': info_pull['state'],
-                    })
+            if not branches:
+                return True
+            with openerp.api.Environment.manage():
+                with openerp.registry(self.env.cr.dbname).cursor() as new_cr:
+                    new_env = api.Environment(
+                        new_cr, self.env.uid, self.env.context)
+                    for branch in branches:
+                        pull_number = branch.branch_name
+                        info_pull = self.github(
+                            '/repos/:owner/:repo/pulls/%s' % (pull_number))
+                        if not info_pull.get('id', False):
+                            continue
+                        branch.with_env(new_env).write({
+                            'branch_remote_name': info_pull['head']['label'],
+                            'branch_remote_pr_number': info_pull['number'],
+                            'branch_remote_state': info_pull['state'],
+                        })
+                        new_env.cr.commit()
 
     @api.model
     def sync_remote_cron(self):
