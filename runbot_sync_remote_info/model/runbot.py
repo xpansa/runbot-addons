@@ -1,11 +1,14 @@
 
 import logging
 
+import openerp
+
 from openerp import api, fields, models
 
 
 _logger = logging.getLogger(__name__)
 INACTIVE_STATE = 'closed'
+
 
 class RunbotBranch(models.Model):
     _inherit = 'runbot.branch'
@@ -15,8 +18,8 @@ class RunbotBranch(models.Model):
     branch_remote_state = fields.Char(size=16)
 
     def write(self, cr, uid, ids, vals, context=None):
-        if 'state' in vals:
-            if vals['state'] == INACTIVE_STATE:
+        if 'branch_remote_state' in vals:
+            if vals['branch_remote_state'] == INACTIVE_STATE:
                 rb_pool = self.pool.get('runbot.build')
                 rbl_pool = self.pool.get('runbot.build.line')
                 build_ids = []
@@ -52,23 +55,34 @@ class RunbotRepo(models.Model):
         _logger.debug('sync remote %s', self.name)
         if self.host_driver == 'github':
             branches = self.env['runbot.branch'].search([
-                ('repo_id', '=', self.ids),
-                ('name', 'like', 'refs/pull/%')
+                ('repo_id', 'in', self.ids),
+                ('name', 'like', 'refs/pull/%'),
+                '|', ('branch_remote_state', '<>', INACTIVE_STATE),
+                ('branch_remote_state', '=', False),
             ])
-            for branch in branches:
-                pull_number = branch.branch_name
-                info_pull = self.github(
-                    '/repos/:owner/:repo/pulls/%s' % (pull_number))
-                if info_pull.get('id', False):
-                    branch.write({
-                        'branch_remote_name': info_pull['head']['label'],
-                        'branch_remote_pr_number': info_pull['number'],
-                        'branch_remote_state': info_pull['state'],
-                        'state': info_pull['state'],
-                    })
+            if not branches:
+                return True
+            with openerp.api.Environment.manage():
+                with openerp.registry(self.env.cr.dbname).cursor() as new_cr:
+                    new_env = api.Environment(
+                        new_cr, self.env.uid, self.env.context)
+                    for branch in branches:
+                        pull_number = branch.branch_name
+                        info_pull = self.github(
+                            '/repos/:owner/:repo/pulls/%s' % (pull_number))
+                        if not info_pull.get('id', False):
+                            continue
+                        branch.with_env(new_env).write({
+                            'branch_remote_name': info_pull['head']['label'],
+                            'branch_remote_pr_number': info_pull['number'],
+                            'branch_remote_state': info_pull['state'],
+                        })
+                        new_env.cr.commit()
 
     @api.model
     def sync_remote_cron(self):
-        repos = self.search([('state', '<>', INACTIVE_STATE)])
+        _logger.debug('START: sync remote cron')
+        repos = self.search([('active', '=', True)])
         for repo in repos:
             repo.sync_remote()
+        _logger.debug('STOP: sync remote cron')
