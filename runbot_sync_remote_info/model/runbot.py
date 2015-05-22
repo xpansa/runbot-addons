@@ -59,7 +59,7 @@ class RunbotRepo(models.Model):
                 ('name', 'like', 'refs/pull/%'),
                 '|', ('branch_remote_state', '<>', INACTIVE_STATE),
                 ('branch_remote_state', '=', False),
-            ])
+            ], order='branch_remote_state DESC, name ASC')
             if not branches:
                 return True
             with openerp.api.Environment.manage():
