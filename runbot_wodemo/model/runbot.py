@@ -17,3 +17,10 @@ class RunbotBuild(osv.osv):
             cmd.remove('--test-enable')
         build.write({'job_start': now()})
         return self.spawn(cmd, lock_path, log_path, cpu_limit=2100)
+
+    def cleanup(self, cr, uid, ids, context=None):
+        res = super(RunbotBuild, self).cleanup(
+            cr, uid, ids, context=context)
+        for build in self.browse(cr, uid, ids, context=context):
+            self.pg_dropdb(cr, uid, "%s-wodemo" % build.dest)
+        return res
