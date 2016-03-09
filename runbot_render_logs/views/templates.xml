@@ -1,0 +1,26 @@
+<openerp>
+    <data>
+        <template id="runbot_render_logs.logs">
+            <t t-call="web.layout">
+                <t t-set="head">
+                    <t t-call-assets="web.assets_common"/>
+                    <t t-call-assets="web.assets_backend"/>
+                    <script type="text/javascript" src="/runbot_render_logs/static/src/readlog.js"></script>
+                    &lt;!--[if lte IE 9]&gt; <link rel="stylesheet" href="/web/static/src/css/ie.css"/> &lt;![endif]--&gt;
+                </t>
+            </t>
+            <t t-foreach="objects" t-as="object">
+                <t t-esc="object.name"/><br/>
+            </t>
+        </template>
+        <template id="object">
+          <h1><t t-esc="object.display_name"/></h1>
+          <dl>
+            <t t-foreach="object._fields" t-as="field">
+              <dt><t t-esc="field"/></dt>
+              <dd><t t-esc="object[field]"/></dd>
+            </t>
+          </dl>
+        </template>
+    </data>
+</openerp>
