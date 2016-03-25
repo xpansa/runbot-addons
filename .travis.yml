@@ -24,9 +24,9 @@ services:
 env:
   global:
   - VERSION="9.0" TESTS="0" LINT_CHECK="0"
-  - secure: "L3XkViRWCtm3pLXDqNAyDQmMLXNqTowU3imL1l/TSr81RnPmTE3O8YhkX+sJQeHASTLUAcymTZFVSido7pbzBYdMqpMYOQbNV17fJQmIHA3IcEi4WhjH7MDdczs78rm0a8v01kibZ3JzvMDpS15o6ESJdsTpPGctUC3G1rG1sh8="
-  - secure: "Stym6U51YxobNVlbMrsgBzeebO0Gzoj0HQZ6p2Wo64ccS9txVSDvp37OkpB78yP7n7I3Dw7BaOIRp6h8wU8r5kjgAGPEaZJoZ9kRvdw+b6Do2qysSSE1p11agx9XHjfVSXEjJsqMD4PMpZPsI4mnP/Q4QFHGtsvD1QCTN33GXcU="
-  - secure: "dUuHLT+R/eYRcrDOYa/4zbKVHCBoWS5vSVM5bH7e4WAddquhftPop6Iyxq0lfwWnXsYql1YyS9x152ZjYFpY4DzVbdDYoOWBFN9PRk5rF0ptxkoa7+ZgF0+anV+3owpY5xtC9fUmP/uPRNQDJUv+/2jNXWQDShd7WZx+Qo4XnJA="
+  - secure: "l2F3YTY52aVAYBj0BVtJagRYid7Cfa1mTv1qfGeTKt3CJT/Ftsp/xLeZOKi4rv+NXquelYyXx+pNYk/UK/EgIEVWeVRggJEm9ffdJBjaGbaTI7r5lAYYCVnuwQCt55Xh5PHncFdSSkfIkzXFZHXBcj9hvKkwCskXLPUP09SUQhY="
+  - secure: "LIDEYEim3h1AzLuF5y9kKz4aCxeKxxPZImi/8/8IXAs/7pbctV8hoju9nRTB/i4QbuzVbsJTLFX8UHxwzc7rMb122RRGUR/BWn/7WqmvHsRr/EaHSIRaVjJVCss2pgQPeffCdOtI1HDoONb48c8m4GxSgyvbPfzHV8/xlH9/EAI="
+  - secure: "ow6k4IjaE9bnUFXJSWKkNnphpY2QzQbcdm7l9Dfqy1ZYhmhG39Gf5AVEY11bTtmOMFpZGmsSxVzMpD7SOOBjJcXia4LfM2OB+zIih2WvpCpgSvOBwErD83K0UvLxccHtNN5g63Ak07GzAQQnHfWsvt6Pz/bDrrc3+fGAGcoYC3w="
   matrix:
   - LINT_CHECK="1"
   - TESTS="1" ODOO_REPO="odoo/odoo" INCLUDE=runbot_selftest,runbot_travis2docker,runbot_send_email
