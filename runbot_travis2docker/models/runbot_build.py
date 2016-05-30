@@ -164,7 +164,7 @@ class RunbotBuild(models.Model):
             '-e', 'TRAVIS_BRANCH=' + build.branch_closest,
             '-e', 'TRAVIS_COMMIT=' + build.name,
             '-e', 'RUNBOT=1',
-            '-e', 'UNBUFFER=1',
+            '-e', 'UNBUFFER=0',
             '-e', 'PG_LOGS_ENABLE=1',
             '-e', 'PG_NON_DURABILITY=1',
             '-e', 'START_SSH=1',
