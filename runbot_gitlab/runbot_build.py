@@ -20,33 +20,75 @@
 #
 ##############################################################################
 
-from openerp.osv import orm, fields
+from openerp import models, api, fields
+# from openerp.osv import fields as osv_fields
 
-from .runbot_repo import escape_branch_name
+from .runbot_repo import escape_branch_name, get_gitlab_project
 
 
-class runbot_build(orm.Model):
+class runbot_build(models.Model):
     _inherit = "runbot.build"
 
-    def _get_dest(self, cr, uid, ids, field_name=None, arg=None, context=None):
-        r = {}
-        other_ids = []
-        for build in self.browse(cr, uid, ids, context=context):
-            if (build.branch_id.merge_request_id or
-                    '/' not in build.branch_id.name):
-                nickname = escape_branch_name(build.branch_id.name)
-                r[build.id] = "%05d-%s-%s" % (
-                    build.id, nickname, build.name[:6]
-                )
-            else:
-                other_ids.append(build.id)
-        if other_ids:
-            r.update(super(runbot_build, self)._get_dest(
-                cr, uid, other_ids, field_name, arg, context=context
-            ))
-        return r
+    @api.depends('repo_id.uses_gitlab', 'branch_id', 'name')
+    def _compute_dest(self):
+        for build in self.filtered('repo_id.uses_gitlab'):
+            nickname = escape_branch_name(build.branch_id.name)[:32].lower()
+            build.dest = "%05d-%s-%s" % (
+                build.id, nickname, build.name[:6]
+            )
+        others = self - self.filtered('repo_id.uses_gitlab')
+        others_by_id = {o.id: o for o in others}
+        for rec_id, dest in others._get_dest('dest', None).iteritems():
+            others_by_id[rec_id].dest = dest
 
-    _columns = {
-        'dest': fields.function(
-            _get_dest, type='char', string='Dest', readonly=1, store=True)
-    }
+    dest = fields.Char('Dest', compute='_compute_dest')
+    gitlab_build_id = fields.Integer(string='Gitlab build id', size=20)
+    gitlab_runner_token = fields.Char()
+
+    @api.multi
+    def github_status(self):
+        gitlab_builds = self.filtered('repo_id.uses_gitlab')
+        for this in gitlab_builds:
+            state = 'pending'
+            if this.state in ['testing']:
+                state = 'running'
+            if this.result in ['ok', 'warn']:
+                state = 'success'
+            if this.result in ['ko']:
+                state = 'failed'
+            if this.result in ['skipped', 'killed']:
+                state = 'canceled'
+            project = get_gitlab_project(this.repo_id.base, this.repo_id.token)
+            project._post(
+                '/projects/%s/statuses/%s' % (
+                    this.branch_id.project_id,
+                    this.name,
+                ),
+                data={
+                    'state': state,
+                    'ref': this.branch_id.branch_name,
+                    'name': 'runbot',
+                    'target_url': '//%s/runbot/build/%s' % (
+                        this.repo_id.domain(),
+                        this.id,
+                    ),
+                })
+        return super(
+            runbot_build, self - gitlab_builds).github_status()
+
+    @api.multi
+    def _log(self, func, message):
+        result = super(runbot_build, self)._log(func, message)
+        for this in self.filtered('gitlab_build_id'):
+            project = get_gitlab_project(this.repo_id.base, this.repo_id.token)
+            project._put(
+                '/builds/%s' % this.gitlab_build_id,
+                data={
+                    'token': this.gitlab_runner_token,
+                    # consider adding the full all log here
+                    'trace': '\n'.join(
+                        self.env['ir.logging'].search([
+                            ('build_id', 'in', this.ids),
+                        ]).mapped(lambda l: '%s %s' % (l.func, l.message))),
+                })
+        return result

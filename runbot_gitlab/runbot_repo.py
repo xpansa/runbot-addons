@@ -33,7 +33,9 @@ except ImportError as exc:
     # don't fail at load if gitlab module is not available
     pass
 
-from openerp import models, fields, api, exceptions
+from openerp import api
+from openerp.exceptions import MissingError, ValidationError
+from openerp import models, fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 
@@ -109,7 +111,7 @@ def get_gitlab_project(base, token, project_id=None):
     :param str token: gitlab user's token
     :param int or None project_id: optional id of project to get
     :returns gitlab3.Project: Gitlab Project
-    :raises exceptions.ValidationError: Repo couldn't be found by name or id
+    :raises openerp.exceptions.ValidationError: Repo couldn't be found by name or id
     """
     domain, name = get_gitlab_params(base)
     gl = GitLab(domain, token)
@@ -118,7 +120,7 @@ def get_gitlab_project(base, token, project_id=None):
     else:
         res = gl.find_project(path_with_namespace=name)
     if not res:
-        raise exceptions.ValidationError(
+        raise ValidationError(
             _('Could not find repo with ') +
             (_("id=%d") % project_id if project_id else _("name=%s") % name)
         )
@@ -127,11 +129,7 @@ def get_gitlab_project(base, token, project_id=None):
 
 def set_gitlab_ci_conf(token, gitlab_url, runbot_domain, repo_id):
     if not token:
-        raise models.except_orm(
-            _('Error!'),
-            _('Gitlab repo requires an API token from a user with '
-              'admin access to repo.')
-        )
+        raise MissingError(_("Gitlab repo requires an API token from a user with admin access to repo"))
     domain, name = get_gitlab_params(gitlab_url.replace(':', '/'))
     url = GITLAB_CI_SETTINGS_URL % (domain, quote_plus(name))
     project_url = "http://%s/gitlab-ci/%s" % (runbot_domain, repo_id)
@@ -319,3 +317,13 @@ class RunbotRepo(models.Model):
             for build in self.env['runbot.build'].search([
                     ('branch_id', 'in', branches.ids)]):
                 build.skip()
+        self._update_project_id(project)
+
+    @api.multi
+    def _update_project_id(self, project):
+        self.ensure_one()
+        # super creates branches without a project_id, fix that
+        self.env['runbot.branch'].search([
+            ('repo_id', 'in', self.ids),
+            ('project_id', '=', False),
+        ]).write({'project_id': project.id})

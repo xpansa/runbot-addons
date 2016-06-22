@@ -24,8 +24,8 @@
     'name': 'Runbot Gitlab Integration',
     'category': 'Website',
     'summary': 'Runbot with Gitlab integration',
-    'version': '8.0.1.1.0',
-    'description': """
+    'version': '9.0.1.0.0',
+    'description': '''
 Runbot Gitlab Integration
 =========================
 
@@ -37,14 +37,16 @@ Contributors
 ------------
 * Sandy Carter (sandy.carter@savoirfairelinux.com)
 * Paul Catinean (paulcatinean@gmail.com)
-""",
-    'author': "Savoir-faire Linux,Odoo Community Association (OCA)",
+''',
+    'author': 'Savoir-faire Linux,Odoo Community Association (OCA)',
     'depends': ['runbot'],
     'external_dependencies': {
         'python': ['gitlab3', ]
     },
     'data': [
-        'runbot_repo_view.xml',
+        # 'views/runbot_branch.xml',
+        'views/runbot_build.xml',
+        'views/runbot_repo.xml',
     ],
-    'installable': False,
+    'installable': True,
 }
