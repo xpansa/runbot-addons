@@ -5,10 +5,10 @@
             <field name="model">runbot.build</field>
             <field name="inherit_id" ref="runbot.view_build_form" />
             <field name="arch" type="xml">
-                <group name="group_params" position="inside">
+                <xpath expr="//group" position="inside">
                     <field name="gitlab_build_id" attrs="{'invisible': [('gitlab_build_id', '=', 0)]}" />
                     <field name="gitlab_runner_token" attrs="{'invisible': [('gitlab_build_id', '=', 0)]}" />
-                </group>
+                </xpath>
             </field>
         </record>
     </data>

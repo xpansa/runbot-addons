@@ -27,7 +27,7 @@
         "views/frontend.xml",
     ],
     "demo": [
-        "demo/runbot_repo_demo.xml",
+        # "demo/runbot_repo_demo.xml",
     ],
     "application": False,
     "installable": True,
